@@ -4,7 +4,7 @@
   "version": "0.5.1",
   "config_flow": true,
   "documentation": "https://github.com/nghaye/ha-edilkamin",
-  "requirements": ["edilkamin==1.2.0"],
+  "requirements": ["edilkamin==1.3.0"],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
