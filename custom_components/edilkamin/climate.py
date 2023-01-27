@@ -22,19 +22,19 @@ from homeassistant.helpers.update_coordinator import (
 from .const import LOGGER, FAN_SPEED_TO_MODE, DOMAIN, FAN_MODES
 
 PRESET_AUTO = "Auto"
-PRESET_1 = "Manual P1"
-PRESET_2 = "Manual P2"
-PRESET_3 = "Manual P3"
-PRESET_4 = "Manual P4"
-PRESET_5 = "Manual P5"
+PRESET_1 = "P1"
+PRESET_2 = "P2"
+PRESET_3 = "P3"
+PRESET_4 = "P4"
+PRESET_5 = "P5"
 
 PRESET_MODES = [PRESET_AUTO, PRESET_1, PRESET_2, PRESET_3, PRESET_4, PRESET_5]
 PRESET_MODE_TO_POWER = {
-    "Manual P1": 1,
-    "Manual P2": 2,
-    "Manual P3": 3,
-    "Manual P4": 4,
-    "Manual P5": 5
+    "P1": 1,
+    "P2": 2,
+    "P3": 3,
+    "P4": 4,
+    "P5": 5
 }
 
 PREHEAT = "Preheat"
