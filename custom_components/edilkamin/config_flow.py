@@ -166,7 +166,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data = self.data | user_input
             return self.async_create_entry(
                 # title=user_input[CONF_USERNAME],
-                title=f"Edilkamin - {self.data[CONF_MAC]}",
+                title=self.data[CONF_MAC],
                 data=self.data
             )
 
