@@ -1,10 +1,10 @@
 {
   "domain": "edilkamin",
   "name": "Edilkamin Stove",
-  "version": "0.7.0-1",
+  "version": "1.0.0",
   "config_flow": true,
   "documentation": "https://github.com/nghaye/ha-edilkamin",
-  "requirements": ["edilkamin==1.4.1"],
+  "requirements": ["edilkamin==1.5.0"],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
