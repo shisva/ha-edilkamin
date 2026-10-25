@@ -51,7 +51,7 @@ The extra sensors and binary sensors are only created if the stove reports the v
 
 ## Issues / To-Do
 
-- More tests needed for the alarm sensor, needs to map the different error codes and messages
+- More tests needed for the alarm sensor: codes 15 to 19 and 22 to 24 come from the Edilkamin app and have not been seen on a real stove (an unknown code is shown as "Unknown", the code is in the "Alarm Code" attribute)
 - Create airkare switch entity only if feature is available
 
 ## Disclaimer

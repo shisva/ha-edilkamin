@@ -34,12 +34,29 @@ ALARMSTATE = {
     9: "Failed gear motor",
     10: "Circuit board to hot",
     11: "Chimney pressure",
-    12: "Environment temperature sensor failed",
-    13: "Environment temperature sensor failed",
-    14: "Environment temperature sensor failed",
+    12: "Room probe fault",
+    13: "Room 2 probe fault",
+    14: "Room 3 probe fault",
+    # Codes 15 to 19 and 22 to 24 come from the Edilkamin app (The Mind),
+    # where the number shown next to the label is the alarm code
+    15: "Water safety thermostat tripping",
+    16: "Water pressure transducer fault",
+    17: "External probe fault",
+    18: "Buffer probe fault",
+    19: "Crucible cleaning fault",
     20: "Failed triac gear motor",
-    21: "Power Outage"
+    21: "Power Outage",
+    22: "Open door",
+    23: "Chimney panel overtemperature",
+    24: "Motherboard fuse fault",
 }
+
+# State used for a code that is not in ALARMSTATE (the code itself is
+# available in the "Alarm Code" attribute)
+ALARM_UNKNOWN = "Unknown"
+
+# Options of the enum sensors: unique labels, plus the unknown state
+ALARM_OPTIONS = list(dict.fromkeys([*ALARMSTATE.values(), ALARM_UNKNOWN]))
 
 
 def _get_path(data: dict, path: tuple):
@@ -230,15 +247,15 @@ class AlarmState(CoordinatorEntity, SensorEntity):
         }
 
         self._attr_device_class = SensorDeviceClass.ENUM
-        self._attr_options = list(ALARMSTATE.values())
+        self._attr_options = ALARM_OPTIONS
+
+        self._attr_extra_state_attributes = {}
 
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         state = self.coordinator.data["status"]["state"]["alarm_type"]
-        if state in ALARMSTATE:
-            self._attr_native_value = ALARMSTATE[state]
-        else:
-            self._attr_native_value = state
+        self._attr_native_value = ALARMSTATE.get(state, ALARM_UNKNOWN)
+        self._attr_extra_state_attributes["Alarm Code"] = state
         self.async_write_ha_state()
 
 
@@ -264,7 +281,7 @@ class LastAlarm(CoordinatorEntity, SensorEntity):
         }
 
         self._attr_device_class = SensorDeviceClass.ENUM
-        self._attr_options = list(ALARMSTATE.values())
+        self._attr_options = ALARM_OPTIONS
 
         self._attr_extra_state_attributes = {}
 
@@ -277,11 +294,9 @@ class LastAlarm(CoordinatorEntity, SensorEntity):
             return
 
         last_alarm = self.coordinator.data["nvm"]["alarms_log"]["alarms"][i-1]
-        if last_alarm["type"] in ALARMSTATE:
-            self._attr_native_value = ALARMSTATE[last_alarm["type"]]
-        else:
-            # Error code unknown, shows only the code
-            self._attr_native_value = last_alarm["type"]
+        # Unknown code: "Unknown" state, the code is in the attributes
+        self._attr_native_value = ALARMSTATE.get(
+            last_alarm["type"], ALARM_UNKNOWN)
 
         self._attr_extra_state_attributes["Alarm Code"] = last_alarm["type"]
         self._attr_extra_state_attributes["Date"] = datetime.fromtimestamp(
