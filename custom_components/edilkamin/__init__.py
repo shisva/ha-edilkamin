@@ -44,10 +44,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok
 
-async def update_listener(hass, config_entry):
-    """Handle options update."""
-    await hass.config_entries.async_reload(config_entry.entry_id)
-
 def register_device(hass, config_entry, mac_address):
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
