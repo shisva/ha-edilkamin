@@ -113,8 +113,10 @@ class EdilkaminCoordinator(DataUpdateCoordinator):
             # handled by the data update coordinator.
             async with async_timeout.timeout(10):
                 return await self.update()
-        except:
-            raise UpdateFailed("Error communicating with API")
+        except Exception as err:  # pylint: disable=broad-except
+            # Keep the real cause in the message (and the traceback chained)
+            # instead of hiding it behind a generic error
+            raise UpdateFailed(f"Error communicating with API: {err!r}") from err
 
     def get_token(self):
         return self._token
