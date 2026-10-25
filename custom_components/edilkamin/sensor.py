@@ -15,7 +15,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_NAME, EntityCategory, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -42,6 +42,50 @@ ALARMSTATE = {
 }
 
 
+def _get_path(data: dict, path: tuple):
+    """Return the value at the given path in a nested dict, None if missing."""
+    for key in path:
+        if not isinstance(data, dict) or key not in data:
+            return None
+        data = data[key]
+    return data
+
+
+# Extra read-only sensors, from the status of the stove
+DATA_SENSORS = [
+    {
+        "key": "thermocouple",
+        "label": "Thermocouple Temperature",
+        "path": ("status", "temperatures", "thermocouple"),
+        "device_class": SensorDeviceClass.TEMPERATURE,
+        "unit": UnitOfTemperature.CELSIUS,
+    },
+    {
+        "key": "boiler",
+        "label": "Boiler Temperature",
+        "path": ("status", "temperatures", "boiler"),
+        "device_class": SensorDeviceClass.TEMPERATURE,
+        "unit": UnitOfTemperature.CELSIUS,
+        "enabled_default": False,
+    },
+    {
+        "key": "puffer",
+        "label": "Puffer Temperature",
+        "path": ("status", "temperatures", "puffer"),
+        "device_class": SensorDeviceClass.TEMPERATURE,
+        "unit": UnitOfTemperature.CELSIUS,
+        "enabled_default": False,
+    },
+    {
+        "key": "wifi_signal",
+        "label": "WiFi Signal",
+        "path": ("status", "flags", "wifi_signal"),
+        "icon": "mdi:wifi",
+        "category": EntityCategory.DIAGNOSTIC,
+    },
+]
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -63,6 +107,17 @@ async def async_setup_entry(
             AlarmState(coordinator, name),
             LastAlarm(coordinator, name),
             AutonomyTime(coordinator, name)
+        ],
+        update_before_add=False,
+    )
+
+    # Read-only sensors, only created if the stove reports the value
+    data = coordinator.data or {}
+    async_add_entities(
+        [
+            DataSensor(coordinator, name, **description)
+            for description in DATA_SENSORS
+            if _get_path(data, description["path"]) is not None
         ],
         update_before_add=False,
     )
@@ -268,3 +323,44 @@ class AutonomyTime(CoordinatorEntity, SensorEntity):
             self.coordinator.data["status"]["pellet"]["autonomy_time"]
         )
         self.async_write_ha_state()
+
+
+class DataSensor(CoordinatorEntity, SensorEntity):
+    """Read-only sensor reading a value of the stove status."""
+
+    def __init__(
+        self,
+        coordinator,
+        name: str,
+        key: str,
+        label: str,
+        path: tuple,
+        device_class=None,
+        unit=None,
+        icon=None,
+        category=None,
+        enabled_default: bool = True,
+    ) -> None:
+        """Create the sensor."""
+        super().__init__(coordinator)
+
+        self._mac_address = coordinator.get_mac()
+        self._path = path
+
+        self._attr_name = f"{name} {label}"
+        self._attr_unique_id = f"{self._mac_address}_{key}"
+        self._attr_device_class = device_class
+        self._attr_native_unit_of_measurement = unit
+        self._attr_icon = icon
+        self._attr_entity_category = category
+        self._attr_entity_registry_enabled_default = enabled_default
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+
+        self._attr_device_info = {
+            "identifiers": {("edilkamin", self._mac_address)}
+        }
+
+    @property
+    def native_value(self):
+        """Return the current value, None if the stove does not report it."""
+        return _get_path(self.coordinator.data or {}, self._path)

@@ -39,8 +39,15 @@ If not, add an instance of `Edilkamin Stove` using the UI in the integration sec
   - Current alarm
   - Last alarm
   - Autonomy time
+  - Thermocouple temperature (boiler and puffer temperatures are available but disabled by default)
+  - WiFi signal (diagnostic)
 - Binary Sensor entities
   - Pellet in Reserve status
+  - Cleaning in progress
+  - Backup battery low (diagnostic)
+  - Service required (diagnostic)
+
+The extra sensors and binary sensors are only created if the stove reports the value.
 
 ## Issues / To-Do
 
