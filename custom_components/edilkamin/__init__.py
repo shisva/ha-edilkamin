@@ -25,8 +25,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         mac_address
     )
 
-    # First refresh
-    await coordinator.async_refresh()
+    # First refresh: raises ConfigEntryNotReady on failure so that Home
+    # Assistant retries the setup later instead of loading entities without data
+    await coordinator.async_config_entry_first_refresh()
     LOGGER.debug(coordinator._device_info)
 
     hass.data.setdefault(DOMAIN, {})
