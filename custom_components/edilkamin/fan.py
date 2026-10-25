@@ -2,7 +2,13 @@
 from __future__ import annotations
 
 import edilkamin
-from .const import DOMAIN, FAN_SPEED_PERCENTAGE, LOGGER, percentage_to_fan_speed
+from .const import (
+    DOMAIN,
+    FAN_SPEED_AUTO,
+    FAN_SPEED_PERCENTAGE,
+    LOGGER,
+    percentage_to_fan_speed,
+)
 
 from homeassistant.components.fan import (
     FanEntity,
@@ -86,7 +92,7 @@ class EdilkaminFan(CoordinatorEntity, FanEntity):
 
         key = f"fan_{self._fan_index}_ventilation"
         speed = self._device_info["nvm"]["user_parameters"][key]
-        if speed == 6:
+        if speed == FAN_SPEED_AUTO:
             self._attr_preset_mode = "auto"
         else:
             self._attr_preset_mode = "none"
@@ -118,7 +124,7 @@ class EdilkaminFan(CoordinatorEntity, FanEntity):
 
         token = self.coordinator.get_token()
         if preset_mode == "auto":
-            payload = {"name": self._mqtt_command, "value": 2}
+            payload = {"name": self._mqtt_command, "value": FAN_SPEED_AUTO}
         else:
             fan_speed = percentage_to_fan_speed(self._attr_percentage)
             payload = {"name": self._mqtt_command, "value": fan_speed}
@@ -141,7 +147,7 @@ class EdilkaminFan(CoordinatorEntity, FanEntity):
         """Turn the fan on"""
         token = self.coordinator.get_token()
         if preset_mode == "auto" or self._attr_preset_mode == "auto":
-            payload = {"name": self._mqtt_command, "value": 6}
+            payload = {"name": self._mqtt_command, "value": FAN_SPEED_AUTO}
         else:
             if percentage:
                 fan_speed = percentage_to_fan_speed(percentage)
