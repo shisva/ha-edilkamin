@@ -1,5 +1,6 @@
 """Constants for the edilkamin integration."""
 import logging
+import math
 
 from homeassistant.components.climate import (
     FAN_AUTO
@@ -49,3 +50,13 @@ FAN_PERCENTAGE_SPEED = {
     80: 4,
     100: 5
 }
+
+
+def percentage_to_fan_speed(percentage: int) -> int:
+    """Convert any percentage to a fan speed (0 to 5).
+
+    Home Assistant can pass percentages that are not multiples of 20
+    (service calls), so round up to the next step like HA does: 1 -> 1,
+    50 -> 3, 100 -> 5. Out of range values are clamped.
+    """
+    return min(5, max(0, math.ceil((percentage or 0) / 20)))

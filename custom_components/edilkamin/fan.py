@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import edilkamin
-from .const import DOMAIN, FAN_SPEED_PERCENTAGE, FAN_PERCENTAGE_SPEED, LOGGER
+from .const import DOMAIN, FAN_SPEED_PERCENTAGE, LOGGER, percentage_to_fan_speed
 
 from homeassistant.components.fan import (
     FanEntity,
@@ -101,7 +101,7 @@ class EdilkaminFan(CoordinatorEntity, FanEntity):
         """Set the speed percentage of the fan."""
         LOGGER.debug("Setting async percentage: %s", percentage)
 
-        fan_speed = FAN_PERCENTAGE_SPEED[percentage]
+        fan_speed = percentage_to_fan_speed(percentage)
         token = self.coordinator.get_token()
         payload = {"name": self._mqtt_command, "value": fan_speed}
 
@@ -120,7 +120,7 @@ class EdilkaminFan(CoordinatorEntity, FanEntity):
         if preset_mode == "auto":
             payload = {"name": self._mqtt_command, "value": 2}
         else:
-            fan_speed = FAN_PERCENTAGE_SPEED[self._attr_percentage]
+            fan_speed = percentage_to_fan_speed(self._attr_percentage)
             payload = {"name": self._mqtt_command, "value": fan_speed}
 
         await self.hass.async_add_executor_job(
@@ -144,9 +144,9 @@ class EdilkaminFan(CoordinatorEntity, FanEntity):
             payload = {"name": self._mqtt_command, "value": 6}
         else:
             if percentage:
-                fan_speed = FAN_PERCENTAGE_SPEED[percentage]
+                fan_speed = percentage_to_fan_speed(percentage)
             else:
-                fan_speed = FAN_PERCENTAGE_SPEED[self._attr_percentage]
+                fan_speed = percentage_to_fan_speed(self._attr_percentage)
             payload = {"name": self._mqtt_command, "value": fan_speed}
 
         await self.hass.async_add_executor_job(

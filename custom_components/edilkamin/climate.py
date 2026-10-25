@@ -142,7 +142,7 @@ class EdilkaminClimate(CoordinatorEntity, ClimateEntity):
 
         op_phase = self._device_info["status"]["state"]["operational_phase"]
         self._attr_extra_state_attributes["operational_phase"] = \
-            OPERATIONAL_PHASE[op_phase]
+            OPERATIONAL_PHASE.get(op_phase, f"Unknown ({op_phase})")
         self._attr_extra_state_attributes["fan_actual_speed"] = \
             self._device_info["status"]["fans"]["fan_1_speed"]
 
